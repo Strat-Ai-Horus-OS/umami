@@ -81,10 +81,17 @@ O fork existe para **marca, design e features novas** — não para multi-domín
 
 Mudanças mínimas no core que precisamos preservar ao sincronizar com o upstream:
 
-- **`Dockerfile` (linha ~45)** — `--allow-build` inclui `@prisma/client,prisma` além de
-  `@prisma/engines`. Sem isso, o pnpm ≥10 falha o build com `ERR_PNPM_IGNORED_BUILDS`
-  (a fase `runner` roda sem o `pnpm-workspace.yaml`). Procure por `[STRAT patch]` no arquivo.
-  Quando o upstream corrigir isso, é só aceitar a versão deles.
+Causa comum: o Easypanel instala o **pnpm mais novo (v11+)**, que trata build-script
+não-classificado como **erro fatal** (`ERR_PNPM_IGNORED_BUILDS`). A imagem oficial
+buildou com pnpm mais antigo (era só warning). Procure por `[STRAT patch]` no Dockerfile.
+
+- **`Dockerfile` fase `deps` (linha ~8)** — `COPY` inclui `pnpm-workspace.yaml`, que carrega
+  `onlyBuiltDependencies`/`ignoredBuiltDependencies`. Sem ele o `pnpm install` aborta.
+- **`Dockerfile` fase `runner` (linha ~45)** — `--allow-build` repetido por pacote
+  (`=@prisma/engines =prisma =@prisma/client`); essa fase roda sem o workspace file e
+  o pnpm **não** aceita lista separada por vírgula.
+
+Quando o upstream corrigir isso, é só aceitar a versão deles.
 
 ## 🗺️ Roadmap de camadas
 

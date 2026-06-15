@@ -5,7 +5,11 @@ FROM node:${NODE_IMAGE_VERSION} AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+# [STRAT patch] copiar pnpm-workspace.yaml: ele carrega onlyBuiltDependencies/
+# ignoredBuiltDependencies. Sem esse arquivo, o pnpm >=11 (que o Easypanel
+# instala) aborta o install com ERR_PNPM_IGNORED_BUILDS por não saber
+# classificar os build scripts (prisma, esbuild, sharp, @swc/core, etc.).
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 
