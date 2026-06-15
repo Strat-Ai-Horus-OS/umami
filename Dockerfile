@@ -42,10 +42,12 @@ RUN set -x \
     && npm install -g pnpm
 
 # Script dependencies
-# [STRAT patch] pnpm novo (>=10) trata build-script ignorado como erro fatal
-# (ERR_PNPM_IGNORED_BUILDS). Esta fase roda sem o pnpm-workspace.yaml, então
-# precisamos liberar prisma/@prisma/client aqui também (e não só @prisma/engines).
-RUN pnpm --allow-build='@prisma/engines,@prisma/client,prisma' add npm-run-all dotenv chalk semver \
+# [STRAT patch] pnpm >=10 trata build-script ignorado como erro fatal
+# (ERR_PNPM_IGNORED_BUILDS). Esta fase roda sem o pnpm-workspace.yaml, então o
+# allowlist precisa vir na CLI — e --allow-build NÃO aceita lista por vírgula:
+# tem que repetir a flag por pacote (senão a string inteira vira "um pacote" e
+# nada é liberado). Liberamos prisma além do @prisma/engines original.
+RUN pnpm --allow-build=@prisma/engines --allow-build=prisma --allow-build=@prisma/client add npm-run-all dotenv chalk semver \
     prisma@${PRISMA_VERSION} \
     @prisma/client@${PRISMA_VERSION} \
     @prisma/adapter-pg@${PRISMA_VERSION}
