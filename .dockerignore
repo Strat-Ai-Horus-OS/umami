@@ -9,3 +9,5 @@ node_modules
 .env.*
 scripts/seed
 scripts/seed-data.ts
+strat
+STRAT.md
