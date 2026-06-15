@@ -10,7 +10,7 @@ WORKDIR /app
 # instala) aborta o install com ERR_PNPM_IGNORED_BUILDS por não saber
 # classificar os build scripts (prisma, esbuild, sharp, @swc/core, etc.).
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10
 RUN pnpm install --frozen-lockfile
 
 # Rebuild the source code only when needed
@@ -43,7 +43,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 RUN set -x \
     && apk add --no-cache curl \
-    && npm install -g pnpm
+    && npm install -g pnpm@10
 
 # Script dependencies
 # [STRAT patch] pnpm >=10 trata build-script ignorado como erro fatal

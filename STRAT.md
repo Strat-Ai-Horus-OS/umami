@@ -81,15 +81,16 @@ O fork existe para **marca, design e features novas** — não para multi-domín
 
 Mudanças mínimas no core que precisamos preservar ao sincronizar com o upstream:
 
-Causa comum: o Easypanel instala o **pnpm mais novo (v11+)**, que trata build-script
-não-classificado como **erro fatal** (`ERR_PNPM_IGNORED_BUILDS`). A imagem oficial
-buildou com pnpm mais antigo (era só warning). Procure por `[STRAT patch]` no Dockerfile.
+Causa-raiz: o `npm install -g pnpm` sem versão pega o **pnpm v11**, que ignora a
+allowlist do `pnpm-workspace.yaml` e aborta o install com `ERR_PNPM_IGNORED_BUILDS`.
+A imagem oficial buildou com pnpm v10 (onde isso é só warning). Procure por `[STRAT patch]`.
 
-- **`Dockerfile` fase `deps` (linha ~8)** — `COPY` inclui `pnpm-workspace.yaml`, que carrega
-  `onlyBuiltDependencies`/`ignoredBuiltDependencies`. Sem ele o `pnpm install` aborta.
+- **`Dockerfile` (fix principal)** — `npm install -g pnpm@10` nas duas fases (deps e
+  runner), fixando a major que o CI oficial usa. **Remove a maioria dos problemas abaixo.**
+- **`Dockerfile` fase `deps` (linha ~8)** — `COPY` inclui `pnpm-workspace.yaml`
+  (carrega `onlyBuiltDependencies`/`ignoredBuiltDependencies`).
 - **`Dockerfile` fase `runner` (linha ~45)** — `--allow-build` repetido por pacote
-  (`=@prisma/engines =prisma =@prisma/client`); essa fase roda sem o workspace file e
-  o pnpm **não** aceita lista separada por vírgula.
+  (pnpm não aceita lista por vírgula).
 
 Quando o upstream corrigir isso, é só aceitar a versão deles.
 
