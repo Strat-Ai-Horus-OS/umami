@@ -51,7 +51,10 @@ RUN set -x \
 # allowlist precisa vir na CLI — e --allow-build NÃO aceita lista por vírgula:
 # tem que repetir a flag por pacote (senão a string inteira vira "um pacote" e
 # nada é liberado). Liberamos prisma além do @prisma/engines original.
-RUN pnpm --allow-build=@prisma/engines --allow-build=prisma --allow-build=@prisma/client add npm-run-all dotenv chalk semver \
+# [STRAT patch] --config.node-linker=hoisted: sem isso o pnpm cria node_modules
+# simbólico (.pnpm + symlinks) e o COPY do standalone do Next por cima quebra o
+# link (ex.: semver), causando ERR_MODULE_NOT_FOUND no start (check-db.js).
+RUN pnpm --config.node-linker=hoisted --allow-build=@prisma/engines --allow-build=prisma --allow-build=@prisma/client add npm-run-all dotenv chalk semver \
     prisma@${PRISMA_VERSION} \
     @prisma/client@${PRISMA_VERSION} \
     @prisma/adapter-pg@${PRISMA_VERSION}

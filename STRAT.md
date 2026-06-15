@@ -90,7 +90,9 @@ A imagem oficial buildou com pnpm v10 (onde isso é só warning). Procure por `[
 - **`Dockerfile` fase `deps` (linha ~8)** — `COPY` inclui `pnpm-workspace.yaml`
   (carrega `onlyBuiltDependencies`/`ignoredBuiltDependencies`).
 - **`Dockerfile` fase `runner` (linha ~45)** — `--allow-build` repetido por pacote
-  (pnpm não aceita lista por vírgula).
+  (pnpm não aceita lista por vírgula) **+** `--config.node-linker=hoisted` (senão o
+  node_modules simbólico do pnpm quebra ao receber o standalone do Next por cima →
+  `ERR_MODULE_NOT_FOUND` de semver no start).
 
 Quando o upstream corrigir isso, é só aceitar a versão deles.
 
