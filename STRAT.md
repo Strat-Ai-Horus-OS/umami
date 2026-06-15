@@ -77,6 +77,15 @@ O fork existe para **marca, design e features novas** — não para multi-domín
 
 ---
 
+## 🩹 Patches de core conhecidos (manter no rebase)
+
+Mudanças mínimas no core que precisamos preservar ao sincronizar com o upstream:
+
+- **`Dockerfile` (linha ~45)** — `--allow-build` inclui `@prisma/client,prisma` além de
+  `@prisma/engines`. Sem isso, o pnpm ≥10 falha o build com `ERR_PNPM_IGNORED_BUILDS`
+  (a fase `runner` roda sem o `pnpm-workspace.yaml`). Procure por `[STRAT patch]` no arquivo.
+  Quando o upstream corrigir isso, é só aceitar a versão deles.
+
 ## 🗺️ Roadmap de camadas
 
 - **C1 — White-label:** logo Strat, paleta (alinhar `Horus-OS/docs/DESIGN-SYSTEM.md`), nome, login, favicon, e-mails.
