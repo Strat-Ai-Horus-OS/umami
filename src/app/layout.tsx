@@ -30,8 +30,8 @@ export default function ({ children }) {
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest" />
-        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
-        <meta name="msapplication-TileColor" content="#da532c" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#185fa5" />
+        <meta name="msapplication-TileColor" content="#185fa5" />
         <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#2f2f2f" media="(prefers-color-scheme: dark)" />
         <meta name="robots" content="noindex,nofollow" />
@@ -51,8 +51,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: getBaseUrl(headerStore),
     title: {
-      template: '%s | Umami',
-      default: 'Umami',
+      template: '%s | Strat Analytics',
+      default: 'Strat Analytics',
     },
   };
 }
