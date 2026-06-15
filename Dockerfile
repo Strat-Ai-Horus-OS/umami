@@ -45,20 +45,7 @@ RUN set -x \
     && apk add --no-cache curl \
     && npm install -g pnpm@10
 
-# Script dependencies
-# [STRAT patch] pnpm >=10 trata build-script ignorado como erro fatal
-# (ERR_PNPM_IGNORED_BUILDS). Esta fase roda sem o pnpm-workspace.yaml, então o
-# allowlist precisa vir na CLI — e --allow-build NÃO aceita lista por vírgula:
-# tem que repetir a flag por pacote (senão a string inteira vira "um pacote" e
-# nada é liberado). Liberamos prisma além do @prisma/engines original.
-# [STRAT patch] --config.node-linker=hoisted: sem isso o pnpm cria node_modules
-# simbólico (.pnpm + symlinks) e o COPY do standalone do Next por cima quebra o
-# link (ex.: semver), causando ERR_MODULE_NOT_FOUND no start (check-db.js).
-RUN pnpm --config.node-linker=hoisted --allow-build=@prisma/engines --allow-build=prisma --allow-build=@prisma/client add npm-run-all dotenv chalk semver \
-    prisma@${PRISMA_VERSION} \
-    @prisma/client@${PRISMA_VERSION} \
-    @prisma/adapter-pg@${PRISMA_VERSION}
-
+# Build artifacts primeiro. O standalone do Next traz seu PRÓPRIO node_modules.
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
@@ -69,6 +56,20 @@ COPY --from=builder /app/generated ./generated
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Script dependencies — instaladas POR ÚLTIMO, sobre o node_modules do standalone.
+# [STRAT patch] Ordem invertida vs. upstream: instalar depois do standalone evita
+# o conflito do COPY do Docker tentando sobrepor dirs do node_modules do pnpm
+# (ex.: "cannot replace directory node_modules/pg with file"). O pnpm escreve o
+# estado FINAL do node_modules.
+# [STRAT patch] --config.node-linker=hoisted: node_modules real (sem symlink .pnpm),
+# senão o semver não resolve no start (ERR_MODULE_NOT_FOUND em check-db.js).
+# [STRAT patch] --allow-build repetido por pacote: pnpm >=10 trata build-script
+# ignorado como erro fatal e NÃO aceita lista por vírgula.
+RUN pnpm --config.node-linker=hoisted --allow-build=@prisma/engines --allow-build=prisma --allow-build=@prisma/client add npm-run-all dotenv chalk semver \
+    prisma@${PRISMA_VERSION} \
+    @prisma/client@${PRISMA_VERSION} \
+    @prisma/adapter-pg@${PRISMA_VERSION}
 
 USER nextjs
 
